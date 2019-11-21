@@ -32,3 +32,5 @@ build/
 mvnw
 mvnw.cmd
 .mvn/*
+src/main/java/com/hjj/.DS_Store
+src/main/java/com/hjj/daylearn/javadaylearn/.DS_Store
