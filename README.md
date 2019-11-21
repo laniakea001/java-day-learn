@@ -32,7 +32,7 @@ java-day-learn
 + 服务器关闭 socket。
 
 ### 实现一个简单 TCP 交互
-
+https://github.com/laniakea001/java-day-learn/tree/master/src/main/java/com/hjj/daylearn/javadaylearn/day02_tcp_udp
 ## UDP
 ### UDP 和 TCP 的不同
 + UDP：单个数据报，不用建立连接，简单，不可靠，会丢包，会乱序；
