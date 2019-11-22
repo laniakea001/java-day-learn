@@ -68,4 +68,6 @@ https://github.com/laniakea001/java-day-learn/tree/master/src/main/java/com/hjj/
 ## 2种锁的比较
     - 乐观锁比较适合应用于读操作比较多的场景，减少阻塞；
     - 悲观锁比较适合应用于数据写操作多的场景，减少重试；
+## 实现
+https://github.com/laniakea001/java-day-learn/tree/master/src/main/java/com/hjj/daylearn/javadaylearn/day03_lock
 
