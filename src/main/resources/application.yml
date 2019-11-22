@@ -1,0 +1,30 @@
+server:
+  port: 9881
+  servlet:
+    context-path: /lock
+redis:
+  database: 3
+  host: 39.105.122.65
+  port: 6379
+  password: 9299
+  # redis连接超时时间（单位毫秒）
+  timeout: 200
+  pool:
+    # 最大可用连接数（默认为8，负数表示无限）
+    max-active: 8
+    # 最大空闲连接数（默认为8，负数表示无限）
+    max-idle: 8
+    # 最小空闲连接数（默认为0，该值只有为正数才有用）
+    min-idle: 0
+    # 从连接池中获取连接最大等待时间（默认为-1，单位为毫秒，负数表示无限）
+    max-wait: -1
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/lock?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true
+    username: root
+    password: root
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
