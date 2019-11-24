@@ -98,6 +98,18 @@ TreeMap 由 红黑树 实现
 #### 红黑树举例
 存储结果如图：
 ![Image text](https://raw.githubusercontent.com/laniakea001/java-day-learn/master/src/main/resources/static/readMeImage/红黑树存储.png)
+
+规则：
+
+1. 节点是红色或黑色。
+
+2. 根节点是黑色。
+
+3. 每个叶子节点都是黑色的空节点（NIL节点）。
+
+4. 每个红色节点的两个子节点都是黑色。(从每个叶子到根的所有路径上不能有两个连续的红色节点)
+
+5. 从任一节点到其每个叶子的所有路径都包含相同数目的黑色节点。
 ## Hashtable
 * 与 HashMap类似,不同的是:key和value的值均不允许为null
 * 它支持线程的同步，即任一时刻只有一个线程能写Hashtable，因此也导致了Hashtale在写入时会比较慢。
