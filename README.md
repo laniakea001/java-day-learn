@@ -71,3 +71,37 @@ https://github.com/laniakea001/java-day-learn/tree/master/src/main/java/com/hjj/
 ## 实现
 https://github.com/laniakea001/java-day-learn/tree/master/src/main/java/com/hjj/daylearn/javadaylearn/day03_lock
 
+# day 04 map底层原理
+## HashMap
+### 介绍
+* 它根据键的HashCode 值存储数据,根据键可以直接获取它的值，具有很快的访问速度。
+* HashMap最多只允许一条记录的键为Null(多条会覆盖);允许多条记录的值为 Null。
+* 非同步的。
+### 底层
+数组+链表+红黑树
+![Image text](https://raw.githubusercontent.com/laniakea001/java-day-learn/master/src/main/resources/static/readMeImage/hashmap.png)
+## TreeMap
+* 能够把它保存的记录根据键(key)排序,默认是按升序排序，也可以指定排序的比较器，
+* 当用Iterator 遍历TreeMap时，得到的记录是排过序的。
+* TreeMap不允许key的值为null。非同步的。
+### 底层
+TreeMap 由 红黑树 实现 
+
+举个栗子🌰：
+基本树结构如下：
+![Image text](https://raw.githubusercontent.com/laniakea001/java-day-learn/master/src/main/resources/static/readMeImage/树的基本结构.png)
+
+插入7，6，5，4，3
+#### 二叉树举例
+存储结果如图：
+![Image text](https://raw.githubusercontent.com/laniakea001/java-day-learn/master/src/main/resources/static/readMeImage/二叉树存储.png)
+#### 红黑树举例
+存储结果如图：
+![Image text](https://raw.githubusercontent.com/laniakea001/java-day-learn/master/src/main/resources/static/readMeImage/红黑树存储.png)
+## Hashtable
+* 与 HashMap类似,不同的是:key和value的值均不允许为null
+* 它支持线程的同步，即任一时刻只有一个线程能写Hashtable，因此也导致了Hashtale在写入时会比较慢。
+## LinkedHashMap
+* 保存了记录的插入顺序，在用Iterator遍历LinkedHashMap时，先得到的记录肯定是先插入的.
+* 在遍历的时候会比HashMap慢。key和value均允许为空，非同步的。
+
