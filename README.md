@@ -28,6 +28,7 @@
 * Replication方案是在master数据库进行写操作，在slave数据库进行读操纵，数据同步是单向的；
 ### 事务（数据一致性）
 ![Image text](https://raw.githubusercontent.com/laniakea001/java-day-learn/master/src/main/resources/static/readMeImage/pxc方案2.png)
+![Image text](https://raw.githubusercontent.com/laniakea001/java-day-learn/master/src/main/resources/static/readMeImage/replication事务1.png)
 * PXC具有强一致性。当一个请求发送到PXC集群中的一个数据库（NODE1）时，会将请求同步到其他的数据库，待其他的节点都成功的提交事务后，才将写入成功的响应返回；
 * Replication具有弱一致性。写入请求到达master数据库时，执行成功后，返回响应。同时，异步地将写入的数据同步到从数据库；如果从数据库写入失败，但是客户端已经收到成功的响应，这是弱一致性的体现；
 # day 07 消息可达性和唯一消费
