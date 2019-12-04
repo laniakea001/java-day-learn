@@ -1,246 +1,65 @@
-# day 06 数据库的集群
+# 线程池
 
-## 方案1: 主从（Repliaction 集群方案）
-### 特点
-* 速度快
-* 弱一直性
-* 低价值
-### 使用场景
-* 日志
-* 新闻
-* 帖子
+Java 中的线程池是运用场景最多的并发框架，几乎所有需要异步或并发执行任务的程序 都可以使用线程池。在开发过程中，合理地使用线程池能够带来 3 个好处。
 
+- 第一：降低资源消耗。通过重复利用已创建的线程降低线程创建和销毁造成的消耗。
 
-## 方案2: PXC 集群方案（ Percona XtraDB Cluster ）
-### 特点
-* 速度慢
-* 强一致性
-* 高价值
-### 使用场景
-* 订单
-* 账户
-* 财务
+- 第二：提高响应速度。当任务到达时，任务可以不需要等到线程创建就能立即执行。
 
-## PXC方案 和 Replication方案对比 
-### 读写
-![Image text](https://raw.githubusercontent.com/laniakea001/java-day-learn/master/src/main/resources/static/readMeImage/pxc方案1.png)
-* PXC在任何节点的写入都会同步到其他节点，数据是双向同步的（在任何节点都可以同时读写）
-* Replication方案是在master数据库进行写操作，在slave数据库进行读操纵，数据同步是单向的；
-### 事务（数据一致性）
-![Image text](https://raw.githubusercontent.com/laniakea001/java-day-learn/master/src/main/resources/static/readMeImage/pxc方案2.png)
-![Image text](https://raw.githubusercontent.com/laniakea001/java-day-learn/master/src/main/resources/static/readMeImage/replication事务1.png)
-* PXC具有强一致性。当一个请求发送到PXC集群中的一个数据库（NODE1）时，会将请求同步到其他的数据库，待其他的节点都成功的提交事务后，才将写入成功的响应返回；
-* Replication具有弱一致性。写入请求到达master数据库时，执行成功后，返回响应。同时，异步地将写入的数据同步到从数据库；如果从数据库写入失败，但是客户端已经收到成功的响应，这是弱一致性的体现；
-## 搭建方案
-* [Replication](https://my.oschina.net/liuyuantao/blog/1860806)
-* [PXC](https://blog.csdn.net/qq_33466466/article/details/84670368)
-# day 07 消息可达性和唯一消费
-## 大前提：mq的高可用
-+ [如何保证消息队列的高可用](https://blog.csdn.net/u014801403/article/details/80312677)
-## 消息可达性
-### 消息投递的核心流程
-![Image text](https://raw.githubusercontent.com/laniakea001/java-day-learn/master/src/main/resources/static/readMeImage/mq-canReceive.png)
-+ 上半场 mq-client-sender --> mq-server
-1. mq-client将消息发送给mq-server（调用api：sendMsg）
-2. mq-server将消息落地，即为发送成功；
-3. mq-server将应答发送给mq-client（调用api：sendCallBack）
-+ 下半场 mq-server --> mq-client-receive
-4. mq-server将消息发送给mq-client（调用api：recvCallBack）
-5. mq-client回复应答（调用api：sendAck）
-6. mq-server收到ack，将之前落地的消息删除，完成消息的可靠投递
-### 消息何时丢失
-+ 上述6个环节，都有可能丢失
-### 如何保证消息的可达性--最终投递
-#### 上半场的超时和重传
-+ mq-client-sender发送失败，内置的timer会自动重发，直到期望的3；
-+ 如果超过N次仍未收到，则sendCallBack回调发送失败；
-+ 此过程中，mq-server可能会收到同一条消息的多次重发；
-#### 下半场的超时和重传
-+ mq-server发送失败，内置的timer会自动重发，直到得到5且6成功；
-+ 这个过程中，可能会重发多次消息；
-+ 一般采用指数退避的策略：先隔x秒重发，然后2x秒重发，4x秒重发，以此类推；
-## 消息唯一消费（消息的幂等性）
-### 上半场
-+ 重发消息的接收方是mq-server；
-+ 与业务无关，与mq有关
-+ mq内部生成唯一的inner-msg-id，作为去重和幂等的依据
-#### 特点
-1. 全局唯一
-2. mq生成，业务无关性，对消息发送方和消息接收方屏蔽
-### 下半场
-+ 重发消息的接收方是mq-client-seceive；
-+ 与mq无关，也业务有关；
-+ 由消息的接收方负责判重，负责幂等；
-+ 业务消息体中，必须有个biz-id，作为判重和幂等的依据；
-#### 特点
-1. 单业务唯一；
-2. 业务相关，mq透明；
-# day 08 redis内存不足，如何解决
-## 淘汰策略（截流）
-+ 当redis的实际内存超过maxmemory时，需要采取memory-policy
-+ 支持的规则
+- 第三：提高线程的可管理性。线程是稀缺资源，如果无限制地创建，不仅会消耗系统资源， 还会降低系统的稳定性，使用线程池可以进行统一分配、调优和监控。
 
-|规则名称|规则说明|
-|---|---|
-|volatile-lru|使用LRU算法删除一个键（只对设置了生存时间的键）|
-|allkeys-lru|使用LRU算法删除一个键|
-|volatile-random|随机删除一个键（只对设置了生存时间的键）|
-|allkeys-random|随机删除一个键|
-|volatile-ttl|删除生存时间最近的一个键|
-|noeviction（默认）| 	不删除键，只返回错误|
-## 集群（开源）
-redis仅支持单实例，内存一般是10-20G，对于更大的缓存需求（100-200G），需要通过集群来支持；
-### 集群的3种实现方式
-#### 客户端分片
-通过业务代码，自己实现分片--代码逻辑控制
-##### 优势
-+ 可以自己控制分片算法，性能较好
-##### 劣势
-+ 维护成本高，扩容/缩容等运维操作都需要单独实现
-#### 代理分片
-代理程序接收来自业务程序的请求，根据路由规则，将请求分发给正确的redis实例，并返回给业务程序。类似，Twemproxy、Codis中间件实现；
-##### 优势
-+ 运维方便，程序不需要关心如何链接redis；
-##### 劣势
-+ 20%的新能消耗
-+ 无法平滑扩容/缩容（codis通过预分片，达到Auto Rebalance）
-+ 需要执行脚本迁移数据，不方便
-#### RedisCluster
-官方的集群方案
-##### 优势
-+ 官方出品，无中心点，和客户端直连，性能好；
-##### 劣势
-+ 方案太重
-+ 无法平滑扩容/缩容
-+ 需要执行相应的脚本，不方便
-# day 09 mysql索引的使用和原理
-## 什么是索引？
+## 线程池的组成
 
-正确的创建合适的索引是提升数据库查询性能的基础。
+Java 中线程池用 ThreadPoolExecutor 来创建
 
-索引是为了加速对表中数据行的检索而创建的一种分散存储的数据结构。
+```java
+public ThreadPoolExecutor(int corePoolSize,
+                              int maximumPoolSize,
+                              long keepAliveTime,
+                              TimeUnit unit,
+                              BlockingQueue<Runnable> workQueue,
+                              ThreadFactory threadFactory,
+                              RejectedExecutionHandler handler)
+```
 
-## 为什么要用索引？
+其中的参数为：
 
-- 索引能极大的减少存储引擎需要扫描的数据量
-- 索引可以把随机IO变成顺序IO
-- 所以可以帮助我们在进行分组、排序等操作时，避免使用临时表
+- int corePoolSize：必需参数，规定了线程池的基本大小，当提交一个任务到线程池时，线程池会创建一个线 程来执行任务，即使其他空闲的基本线程能够执行新任务也会创建线程，等到需要执行的任务数大于线程池基本大小时就不再创建。如果调用了线程池的 prestartAllCoreThreads()方法， 线程池会提前创建并启动所有基本线程。
+- int maximumPoolSize：必需参数，线程池中允许创建线程的最大数量，如果队列满了，并且已创建的线程数小于最大线程数，则线程池会再创建新的线程执行任务。值得注意的是，如 果使用了无界的任务队列这个参数就没什么效果。
+  long keepAliveTime：必需参数，线程活动保持时间，线程池的工作线程空闲后，保持存活的时间。所以，如果任务很多，并且每个任务执行的时间比较短，可以调大时间，提高线程的利用率。
+- TimeUnit unit：必需参数，线程活动保持时间的单位，可选的单位有天（DAYS）、小时（HOURS）、分钟 （MINUTES）、毫秒（MILLISECONDS）、微秒（MICROSECONDS，千分之一毫秒）和纳秒 （NANOSECONDS，千分之一微秒）。
+- BlockingQueue<Runnable> workQueue：必需参数，任务队列，用于保存等待执行的任务的阻塞队列，关于阻塞队列可以参考https://my.oschina.net/u/3352298/blog/1807780
+- ThreadFactory threadFactory：非必须参数，不设置此参数会采用内置默认参数。用于设置创建线程的工厂，可以通过线程工厂给每个创建出来的线程设置更有意义的名字。
+- RejectedExecutionHandler handler：非必须参数，不设置此参数会采用内置默认参数，设置饱和策略，当队列和线程池都满了，说明线程池处于饱和状态，那么必须采取一种策略处理提交的新任务。RejectedExecutionHandler 的实现类在 ThreadPoolExecutor 中有四个静态内部类，这个策略默认情况下是 AbortPolicy，表示无法 处理新任务时抛出异常。共有 4 中策略，包括 AbortPolicy（直接抛出异常）。CallerRunsPolicy（只用调用者所在线程来运行任务）。DiscardOldestPolicy（丢弃队列里最近的一个任务，并执行当前任务）。DiscardPolicy（不处理，丢弃掉）。也可以根据应用场景需要来实现 RejectedExecutionHandler 接口自定义策略。如记录日志或持久化存储不能处理的任务。
 
-## 为什么是B+Tree
+## 线程池的图解
 
-### 二叉查找树
+![Image text](https://raw.githubusercontent.com/laniakea001/java-day-learn/master/src/main/resources/static/readMeImage/线程池的原理图.png)
+依据图片 ThreadPoolExecutor 执行 execute()方法有四种情况：
 
-- 最差情况可能形成链表结构
+1. 如果当前运行的线程少于 corePoolSize，则创建新线程来执行任务（注意，执行这一步骤 需要获取全局锁）。
+2. 如果运行的线程等于或多于 corePoolSize，则将任务加入 BlockingQueue。
+3. 如果无法将任务加入 BlockingQueue（队列已满），则创建新的线程来处理任务（注意，执 行这一步骤需要获取全局锁）。
+4. 如果创建新线程将使当前运行的线程超出 maximumPoolSize，任务将被拒绝，并调用 RejectedExecutionHandler.rejectedExecution()方法。
 
-### 平衡二叉查找树
+## 补充
 
-- 太深，数据处的深度决定了IO操作的次数，IO操作耗时大
-- 太小，每一个磁盘块（节点/页）保存的数据量太小 ，没有很好的利用操作磁盘IO的数据交换特性，也没有利用好磁盘IO的预读能力（空间局部性原理），从而带来频繁的IO操作
+### 调度线程池图解
 
-### 多路平衡查找树B-Tree
+![Image text](https://raw.githubusercontent.com/laniakea001/java-day-learn/master/src/main/resources/static/readMeImage/调度线程池图解.png)
 
-- 数据在节点中，按页IO时查找的数据量会被非关键数据占用
-- 查询速度不稳定，可能查找第一层数据之后就返回结果，也可能查找很多层数据之后返回
+### 各种类型的线程池
 
-### 加强版多路平衡查找树B+Tree
+- [详细代码]()
 
-- 只有叶子节点保存数据，所有查找都必须查找到叶子节点。
-- 非叶子节点只存索引，一次按页IO的数据量会更大。
+1. FixedThreadPool:创建使用固定线程数的 FixedThreadPool 的 API，适用于为了满足资源管理的需求，而需要限制当前线程数量的应用场 景，它适用于负载比较重的服务器。
 
-### B+Tree与B-Tree的区别
+2. SingleThreadExecutor:创建使用单个线程的 SingleThreadExecutor 的 API，适用于需要保证顺序地执行各个任务；并且在任意时间点，不会有多 个线程是活动的应用场景。
 
-1. B+节点关键字搜索采用闭合区间
-2. B+非叶节点不保存数据相关信息，只保存关键字和子节点的引用
-3. B+关键字对应的数据保存在叶子节点中
-4. B+叶子节点是顺序排列的，并且相邻节点剧有顺序引用的关系
+3. CachedThreadPool:创建一个会根据需要创建新线程的 CachedThreadPool 的 API，是大小无界的线程池，适用于执行很多的短期异步任务的小程序，或者是负载较轻的服务器。
 
-### 为什么选用B+Tree?
+4. ScheduledThreadPoolExecutor:内置 timer 定时器，使用工厂类 Executors 来创建的包含一个或多个线程的线程池。适用于执行周期任务；
 
-- B+树是B-树的变种,多路绝对平衡查找树，他拥有B-树的优势
-- B+树扫库、表能力更强
-- B+树的磁盘读写能力更强
-- B+树的排序能力更强
-- B+树的查询效率更加稳定
+5. ForkJoinPool：将一个大任务拆分成多个小任务后，使用 fork 可以将小任务分发给其他线程同时处理，使用 join 可以将多个线程处理的结果进行汇总；这实际上就是分治思想的并行版本。
 
-## Mysql中B+Tree索引的体现形式
-
-### myisam引擎
-
-- .myi文件存索引,.myd文件存数据
-- 不同列上的关键字最后都得到的是一个指向.myd文件的地址
-
-### innodb引擎
-
-- 以主键为索引来组织数据的存储
-- 辅助索引得到主键索引的id
-  聚集索引-数据库表行中数据的物理顺序与键值的逻辑（索引）顺序相同
-
-## 索引的应用
-
-### 列的离散性count(distinct col):count(col)
-
-离散型越高选择性就月好
-
-### 最左匹配原则
-
-对索引关键字进行计算（对比），一定是从左往右一次进行，且不可跳过
-
-### 联合索引
-
-**单列索引**
- 节点中关键字[name]
-
-**联合索引**
- 节点中关键字[name,phone]
-
-**单列索引是特殊的联合索引**
-
-**联合索引列选择原则**
-
-1. 经常用的列优先[最左匹配原则]
-2. 选择性（离散度）高的列优先[离散度高原则]
-3. 宽度小的列优先[最小空间原则]
-
-### 覆盖索引
-
-如果查询列可通过索引节点中的关键字直接返回，则该索引称之为覆盖索引。
-
-覆盖索引可减少数据库IO，将随机IO变为顺序IO，可提高查询性能。
-
-### 总结
-
-- 索引列的数据长度能少则少
-- 索引一定不是越多越好，越全越好，一定是建合适的
-- 匹配列浅醉可用到索引，like %9999%、like %9999%用不到索引，like 9999%在列离散度高的时候能用到索引，离散度低的时候用不到
-- where条件中not in和<>操作无法使用索引
-- 匹配范围值，order by也可用到索引
-- 多用指定列查询，只返回自己想要的数据列，少用select *;
-- 联合索引中如果不是按照索引最左列开始查找，无法使用索引
-- 联合索引中精确匹配最左前列并范围匹配另外一列可以用到索引
-- 联合索引中如果查询中有某个列的范围查询，则其右边所有列都无法使用索引
-
-# day 10 select、poll、epoll 区别
-select、poll、epoll 3个都是IO多路复用的技术
-## 进程最大连接数
-+ select: 单个进程所能打开的最大连接数由FD_SETSIZE宏定义，其大小是32个整数的大小，当然可以进行修改，需要重新编译内核；
-+ poll：poll本质上和select没有区别，但是没有最大连接数 的限制，原因是它基于链表进行存储的；
-+ epoll：虽然有上限，但是很大；1G可以打开10万，2G可以打开20万；
-## FD剧增后带来的IO效率问题
-+ select：因为采用的是调用时对所有连接进行线性遍历，所以会面对随着FD增加带来遍历速度线性下降的性能问题；
-+ poll：同上
-+ epoll：因为epoll内核中采用的是根据每个fd上的callback函数实现的，只有活跃的socket才会调用callback，所以在活跃的socket较少的情况下，使用epoll不会有上面的性能问题；
-## 消息传递方式
-+ select：内核需要将消息传递到用户空间，都需要内核的拷贝动作；
-+ poll：同上；
-+ epoll：通过内核和用户共享同一个块内存来实现；
-## 补充：epoll的数据结构
-![Image text](https://raw.githubusercontent.com/laniakea001/java-day-learn/master/src/main/resources/static/readMeImage/epoll的数据结构.jpg)
-如上图所示，eventpoll包含了lock、mtx、wq（等待队列）、rdlist等成员。rdlist和rbr是我们所关心的。
-### 就绪列表的数据结构
-+ 就绪列表引用着就绪的socket，所以它应能够快速的插入数据。
-+ 程序可能随时调用epoll_ctl添加监视socket，也可能随时删除。当删除时，若该socket已经存放在就绪列表中，它也应该被移除。
-+ 所以就绪列表应是一种能够快速插入和删除的数据结构。双向链表就是这样一种数据结构，epoll使用双向链表来实现就绪队列（对应上图的rdllist）。
-### 索引结构
-+ 既然epoll将“维护监视队列”和“进程阻塞”分离，也意味着需要有个数据结构来保存监视的socket。至少要方便的添加和移除，还要便于搜索，以避免重复添加。
-+ 红黑树是一种自平衡二叉查找树，搜索、插入和删除时间复杂度都是O(log(N))，效率较好。epoll使用了红黑树作为索引结构（对应上图的rbr）。
-+ 因为操作系统要兼顾多种功能，以及由更多需要保存的数据，rdlist并非直接引用socket，而是通过epitem间接引用，红黑树的节点也是epitem对象。同样，文件系统也并非直接引用着socket。
+6. WorkStealingPool：任务窃取，都是守护线程。每个线程都有要处理的队列中的任务，如果其中的线程完成自己队列中的任务，那么它可以去其他线程中获取其他线程的任务去执行。
