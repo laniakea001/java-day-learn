@@ -50,7 +50,7 @@ public ThreadPoolExecutor(int corePoolSize,
 
 ### 各种类型的线程池
 
-- [详细代码]()
+- [详细代码](https://github.com/laniakea001/java-day-learn/tree/master/src/main/java/com/hjj/daylearn/javadaylearn/day11_thread_pool)
 
 1. FixedThreadPool:创建使用固定线程数的 FixedThreadPool 的 API，适用于为了满足资源管理的需求，而需要限制当前线程数量的应用场 景，它适用于负载比较重的服务器。
 
