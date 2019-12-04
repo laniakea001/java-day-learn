@@ -37,7 +37,7 @@ java-day-learn
 
 ### 实现一个简单 TCP 交互
 
-https://github.com/laniakea001/java-day-learn/tree/master/src/main/java/com/hjj/daylearn/javadaylearn/day02_tcp_udp
+- [详细代码](https://github.com/laniakea001/java-day-learn/tree/master/src/main/java/com/hjj/daylearn/javadaylearn/day02_tcp_udp)
 
 ## UDP
 
@@ -92,7 +92,7 @@ https://github.com/laniakea001/java-day-learn/tree/master/src/main/java/com/hjj/
 
 ## 实现
 
-https://github.com/laniakea001/java-day-learn/tree/master/src/main/java/com/hjj/daylearn/javadaylearn/day03_lock
+- [详细代码](https://github.com/laniakea001/java-day-learn/tree/master/src/main/java/com/hjj/daylearn/javadaylearn/day03_lock)
 
 # day 04 map 底层原理
 
@@ -277,6 +277,6 @@ CREATE TABLE `SEQUENCE` (
 
 # day 07 消息可达性和唯一消费
 
-# day 08 redis内存不足，如何解决
+# day 08 redis 内存不足，如何解决
 
-# day 09 mysql索引的使用和原理
+# day 09 mysql 索引的使用和原理
