@@ -66,7 +66,7 @@ public ThreadPoolExecutor(int corePoolSize,
 
 # day 12 限流算法
 
-- [详细代码]()
+- [详细代码](https://github.com/laniakea001/java-day-learn/tree/master/src/main/java/com/hjj/daylearn/javadaylearn/day12_limit_req)
 
 ## 固定窗口计数器
 
