@@ -27,7 +27,7 @@
 ```java
 //java 自带的 uuid
 //使用简单、性能好、本地生成
-UUId uuid = new UUID();
+String uuid = UUID.randomUUID().toString();
 ```
 
 62 进制的 UUID 生成方法（java 版）
@@ -55,3 +55,7 @@ UUId uuid = new UUID();
 
 Redis 的所有命令操作都是单线程的，本身提供像 incr 和 increby 这样的自增原子命令，所以能保证生成的 ID 肯定是唯一有序的
 类似数据库自增 ID，性能优于数组库自增
+
+# day 18 两个线程，一个只能存有数组 1、2、3 和另一个存有 a、b、c，然后通过调度，最终结果输出 1a2b3c
+
+- [详细代码](https://github.com/laniakea001/java-day-learn/tree/master/src/main/java/com/hjj/daylearn/javadaylearn/day18_thread)
