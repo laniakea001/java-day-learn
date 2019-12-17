@@ -1,6 +1,6 @@
 package com.hjj.daylearn.javadaylearn.day12_limit_req.SlidingWindowCounter;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.util.Random;
