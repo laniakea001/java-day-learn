@@ -59,3 +59,7 @@ Redis 的所有命令操作都是单线程的，本身提供像 incr 和 increby
 # day 18 两个线程，一个只能存有数组 1、2、3 和另一个存有 a、b、c，然后通过调度，最终结果输出 1a2b3c
 
 - [详细代码](https://github.com/laniakea001/java-day-learn/tree/master/src/main/java/com/hjj/daylearn/javadaylearn/day18_thread)
+
+# day 19 输入一个 int 数组，返回一个数组，其中奇数都在左边，偶数都在右边（附加条件 不使用额外的空间）
+
+- [详细代码](https://github.com/laniakea001/java-day-learn/tree/master/src/main/java/com/hjj/daylearn/javadaylearn/day19)
