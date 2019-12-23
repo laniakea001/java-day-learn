@@ -63,3 +63,35 @@ Redis 的所有命令操作都是单线程的，本身提供像 incr 和 increby
 # day 19 输入一个 int 数组，返回一个数组，其中奇数都在左边，偶数都在右边（附加条件 不使用额外的空间）
 
 - [详细代码](https://github.com/laniakea001/java-day-learn/tree/master/src/main/java/com/hjj/daylearn/javadaylearn/day19)
+
+# day 20 Synchronized 和 ReentrantLock 的对比
+
+## 相同点：
+
+两者都是可重入锁，同一个线程每进入一次，锁的计数器都自增 1，等到锁的计数器下降为 0 时才能释放锁。
+
+## 底层实现对比：
+
+Synchronized 是依赖于 JVM 实现的，而 ReentrantLock 是 JDK 实现的。
+
+## 性能对比：
+
+Synchronized 优化以前，性能比 ReenTrantLock 差很多，但是自从 Synchronized 引入了偏向锁，轻量级锁（自旋锁）后，两者的性能就差不多了。
+
+在两种方法都可用的情况下，官方甚至建议使用 synchronized。
+
+Synchronized 的优化借鉴了 ReentrantLock 中的 CAS 技术。都是试图在用户态就把加锁问题解决，避免进入内核态的线程阻塞。
+
+## 使用便利性对比：
+
+Synchronized 的使用比较方便简洁，并且由编译器去保证锁的加锁和释放；
+
+而 ReentrantLock 需要手工声明来加锁和释放锁，为了避免忘记手工释放锁造成死锁，所以最好在 finally 中声明释放锁。
+
+## ReenTrantLock 独有的能力：
+
+1. ReentrantLock 可以指定是公平锁还是非公平锁。而 Synchronized 只能是非公平锁。PS：公平锁就是先等待的线程先获得锁。
+
+2. ReentrantLock 提供了一个 Condition 类，用来实现分组唤醒需要唤醒的线程们，而 Synchronized 只能随机唤醒一个线程，或者唤醒全部线程。
+
+3. ReentrantLock 提供了一种能够中断等待锁的线程的机制，通过 lock.lockInterruptibly()来实现这个机制。
